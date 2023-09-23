@@ -29,7 +29,6 @@ for name in os.listdir("."):
         aff.append(int(eachRatio[0])/12)
         pow.append(int(eachRatio[1])/12)
         ach.append(int(eachRatio[2])/12)
-        # print(aff)
 
         frame = pd.read_csv(name, index_col=None, header=0)
 
@@ -60,21 +59,21 @@ fig2.show()
 
 
 normalizedNewYield = [(math.log(x)) for x in newYield]
-fig13 = ff.create_ternary_contour(np.array([np.array(aff), np.array(ach), np.array(pow)]), np.array(normalizedNewYield),
+fig3 = ff.create_ternary_contour(np.array([np.array(aff), np.array(ach), np.array(pow)]), np.array(normalizedNewYield),
                                 pole_labels=['Aff', 'Ach', 'Pow'],
                                 interp_mode='cartesian',
                                 ncontours=20,
                                 colorscale='Viridis',
                                 showscale=True,
                                 title='Yield per unit Tension')
-fig13.show()
+fig3.show()
 
 
-fig16 = ff.create_ternary_contour(np.array([np.array(aff), np.array(ach), np.array(pow)]), np.array(incentiveTensionPerStep),
+fig4 = ff.create_ternary_contour(np.array([np.array(aff), np.array(ach), np.array(pow)]), np.array(incentiveTensionPerStep),
                                 pole_labels=['Aff', 'Ach', 'Pow'],
                                 interp_mode='cartesian',
                                 ncontours=20,
                                 colorscale='Viridis',
                                 showscale=True,
                                 title='Perceived Tension per Step')
-fig16.show()
+fig4.show()

@@ -1,17 +1,8 @@
 import pandas as pd
-import glob
-import matplotlib.pyplot as plt  # To visualize
 import os
-import numpy as np
-import scipy.stats as stats
 import matplotlib.pyplot as plt
-import scipy.stats as stats
-import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from bioinfokit.analys import stat
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
-import math
+import scipy.stats as ss
+import scikit_posthocs as sp
 
 mainLi = []
 
@@ -29,7 +20,7 @@ for name in os.listdir("."):
         formattedNameWithEncoding = formattedNameWithoutCSV.split("_")[-1]
         df.rename({field: formattedNameWithEncoding}, axis=1, inplace=True)
         mainLi.append(df)
-# mydata = pd.concat(mainLi, axis=1)
+
 csvFileName = "tension.csv"
 with open('./' + csvFileName, 'w') as f:
     pd.concat(mainLi, axis=1).to_csv(f, index=False)
@@ -37,13 +28,10 @@ with open('./' + csvFileName, 'w') as f:
 names = os.listdir("../..")
 
 
-import scipy.stats as ss
-import scikit_posthocs as sp
-
 names = []
 for name in os.listdir("../tmp"):
     if name != "summary.py" and name != "anova.py" and name != "yieldperunittension.csv" and name != "stats.html" and\
-            name != "yield.csv" and name != 'tension.csv' and name != "posthoc.html":
+            name != "yield.csv" and name != 'tension.csv':
         formattedNameWithoutCSV = name.split(".")[0]
         formattedNameWithEncoding = formattedNameWithoutCSV.split("_")[-1]
         names.append(formattedNameWithEncoding)
