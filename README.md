@@ -9,5 +9,5 @@ The main branch contains the results obtained for the four metrics as CSV files.
 - Execute the script path `motivated-predators-in-pursuit-domain\seekAndTrack\prepareEnv.py` with parameters similar to the follwoing example.
 - `--grid-size 16 --motive-profile-ratio 4 4 4 --predator-count 12 --prey-count 6 --difficulty-level 0` will configure a 16x16 arena with a team of 12 predators equally distributed across the 3 motives. The arena will have 6 preys where 80% of the preys will be extremely slow as the difficulry level is set to 'Easy' (0).
 
-## Cite
-Please cite our paper if you use this code in your work.
+## Demo
+![Alt text](demo.gif)
