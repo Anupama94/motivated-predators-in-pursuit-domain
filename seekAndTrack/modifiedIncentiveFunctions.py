@@ -96,10 +96,10 @@ def calculateLocalIncentive(normalizedS, normalizedA, significanceWeight, adjace
       return 0.05 * math.exp(-(1 - normalizedS)) * math.exp(2.5 * (1 - normalizedA))
 
 @njit
-def calculateLocalEfficiencyIncentive(d, gridSize, thresholdDistance):
+def calculateLocalEfficiencyIncentive(d, gridSize, threshold_d=5):
 
     if d <= 5:
-        return 1 / (1 + math.exp(-0.8 * (5 - d)))
+        return 1 / (1 + math.exp(-0.8 * (threshold_d - d)))
     else:
         return 0.001
 
@@ -115,7 +115,7 @@ def calculateModifiedGlobalIncentive(preyVicinityRange, prey, predators, grid, n
             numberOfPredatorsInVicinity += 1
 
     if numberOfPredatorsInVicinity < 2:
-        return 1/(1 + math.exp(20 * (numberOfPredatorsInVicinity + 13) - 12))
+        return 1/(1 + math.exp(-20 * (numberOfPredatorsInVicinity - 13) + 12))
 
     else:
-        return 1/(1 + math.exp(-20 * (numberOfPredatorsInVicinity + 16) - 13))
+        return 1/(1 + math.exp(20 * (numberOfPredatorsInVicinity - 16) + 13))

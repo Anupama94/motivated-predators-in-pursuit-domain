@@ -6,13 +6,10 @@ import time
 import pandas as pd
 from pathlib import Path
 from numba import njit, jit
-from numba.typed import List, Dict
-from numba import types, typeof, typed
+from numba.typed import List
 import numpy as np
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
-from numba import int32, float32, deferred_type
-
 from arena import Env
 from argumentList import ArgumentList
 from grid import Grid
@@ -23,8 +20,6 @@ from modifiedIncentiveFunctions import getModifiedPowerMotivationTendency, getMo
 from modifiedUtils import configurePreys, configurePredators, assignPosition, rand_choice_nb,\
     modified_calculateLocalIncentivesForEachGoal, modified_localEfficiencyIncentive, getClosestTargetCell, formatFolderName, \
     map_difficulty_level
-
-
 
 
 def parse_args():
@@ -46,18 +41,15 @@ def parse_args():
     parser.add_argument("--predator-vision-range", type=int, default=15, help="vision range of predators")
     parser.add_argument("--predator-communication-range", type=int, default=15, help="communication range of predators")
     parser.add_argument("--enable-gui", type=bool, default=True, help="enable UI")
-
-
-
     return parser.parse_args()
+
 
 @njit(nogil=True)
 def startGame(arglist):
-    gameStats = np.full((arglist.prey_count + 43), -1.0)
-    columns = np.arange(0, arglist.prey_count + 43)
+    gameStats = np.full((arglist.prey_count + 35), -1.0)
+    columns = np.arange(0, arglist.prey_count + 35)
     for i in range(1):
         grid = Grid(arglist.grid_size, arglist.grid_size)
-
         # env = Env(grid, arglist.enable_gui)
         arglist.motive_profile_ratio = np.array([arglist.aff_count, arglist.pow_count, arglist.ach_count])
         preys = configurePreys(arglist.prey_count, arglist.difficulty_level)
@@ -79,36 +71,9 @@ def startGame(arglist):
                 grid.occupyCellByPredator(row, col, agent)
                 counter += 1
 
-
         steps = 0
         intrinsicReward = 1
         preyYield = 0
-        yieldIn200Steps = 0
-        tensionIn200Steps = 1
-        tensionIn200Steps2 = 1
-        yieldIn400Steps = 0
-        tensionIn400Steps = 1
-        tensionIn400Steps2 = 1
-        yieldIn600Steps = 0
-        tensionIn600Steps = 1
-        tensionIn600Steps2 = 1
-        yieldIn1000Steps = 0
-        tensionIn1000Steps = 1
-        tensionIn1000Steps2 = 1
-        yieldIn1200Steps = 0
-        tensionIn1200Steps = 1
-        yieldIn1400Steps = 0
-        tensionIn1400Steps = 1
-        yieldIn1600Steps = 0
-        tensionIn1600Steps = 1
-        yieldIn1800Steps = 0
-        tensionIn1800Steps = 1
-        yieldIn800Steps = 0
-        tensionIn800Steps = 1
-        yieldIn500Steps = 0
-        tensionIn500Steps = 1
-        yieldIn2000Steps = 0
-        tensionIn2000Steps = 1
         yieldperunittension = 1
 
         game = Game(grid, 4, List(preys), List(predators))
@@ -138,8 +103,6 @@ def startGame(arglist):
                             if shouldRest == 0:
                                 grid.movePreyToNewCell(prey, cellWithMaxDist)
 
-
-
                     if game.isPreyCaptured(prey):
                         game.arena.markDeadPrey(prey)
                         gameStats[arglist.prey_count - game.numberOfPreysLeft] = steps
@@ -155,17 +118,12 @@ def startGame(arglist):
                 gameStats[finalCount] = steps
                 gameStats[finalCount+1] = intrinsicReward
                 gameStats[finalCount+2] = (preyYield * 1000) / steps
-
                 gameStats[finalCount + 34] = intrinsicReward / steps
-
-
 
                 columns[finalCount] = 111.0 # step count
                 columns[finalCount+1] = 222.0 # perceived_tension
                 columns[finalCount+2] = 333.0 # yield
-
-                columns[finalCount + 13] = 784.0
-
+                columns[finalCount + 3] = 784.0
                 columns[finalCount + 34] = 805.0
 
                 print(i, " GAME OVER !!!!!", "STEPS", steps)
@@ -190,7 +148,7 @@ def startGame(arglist):
                                                                                                 arglist.adjacent_weight,
                                                                                                 arglist.local_aff_range)))
 
-                        # caluclating local eff incentiives
+                        # calculating local eff incentiives
                         localEffIncentives.append((p, modified_localEfficiencyIncentive(p, grid,
                                                                                predator, arglist.threshold_distance))) # ASK THARAKA
 
@@ -239,7 +197,7 @@ def startGame(arglist):
 
                 dist = grid.getManhattenDistance(predator.targetPrey.currentPosition, predator.currentPosition)
 
-                predatorShouldRest = rand_choice_nb(np.asarray([0, 1]), np.asarray([0.98, 0.02]))
+                predatorShouldRest = rand_choice_nb(np.asarray([0, 1]), np.asarray([1-predator.stamina, predator.stamina]))
                 if predatorShouldRest == 0:
                     if dist > 1:
                         predatorNextMove(predator, predator.targetPrey, grid)

@@ -1,9 +1,6 @@
 import sys
-
 import pygame as pygame
 from threading import Thread
-
-
 
 BLACK = (50, 50, 50)
 WHITE = (255, 255, 255)
@@ -12,16 +9,10 @@ RED = (194, 24, 91)
 BLUE = (0, 0, 128)
 YELLOW = (255, 255, 0)
 MARGIN = 2
-
 BLOCK_SIZE = 20
-
-
 PREY = "PREY"
 PREDATOR = "PREDATOR"
 
-
-NUMBER_OF_PREYS = 1
-NUMBER_OF_PREDATORS = 4
 
 def redistribute_rgb(r, g, b):
     threshold = 255.999
@@ -64,21 +55,13 @@ class Env:
     def draw_grid(self):
 
         grid = self.grid.grid
-        print("OWKAYYY")
         for x in range(0, self.grid.numberOfRows):
             for y in range(0, self.grid.numberOfColumns):
                 # draw prey
                 color = WHITE
-                print("HOW ABOUT NOW")
                 if grid[y, x, 2] != 0:
                     id = 1 + int(grid[y][x][2]) * -0.5
                     color = redistribute_rgb(127 / id, 255 / id, 0 / id)
-                # elif grid[y][x].value["PREY"] == "-2":
-                #     color = GREEN
-                # elif grid[y][x].value["PREY"] == "-3":
-                #     color = BLUE
-                # elif grid[y][x].value["PREY"] == "-4":
-                #     color = BLUE
 
                 pygame.draw.rect(self.screen, color, [(MARGIN + BLOCK_SIZE) * x + MARGIN,
                                                       (MARGIN + BLOCK_SIZE) * y + MARGIN,

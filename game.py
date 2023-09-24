@@ -17,10 +17,8 @@ def delete_workaround(arr, num):
 spec = [
     ('arena', Grid.class_type.instance_type),               # a simple scalar field
     ('capturedState', int32),
-    # ('preys', types.ListType(Prey.class_type.instance_type)),
     ('predators', types.ListType(Predator.class_type.instance_type)),
     ('numberOfPreysLeft', int32),
-    # ('preys', types.ListType(types.unicode_type, types.ListType(Prey.class_type.instance_type))),
     ('preys', types.ListType(Prey.class_type.instance_type))
 
 ]

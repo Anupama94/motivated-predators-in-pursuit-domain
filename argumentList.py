@@ -1,7 +1,6 @@
 
-from numba import types, typeof, typed
-import numpy as np
-from numba import int32, float32, deferred_type, boolean
+from numba import types
+from numba import int32, boolean
 from numba.experimental import jitclass
 
 
@@ -45,10 +44,9 @@ class ArgumentList:
         self.regiment = "ALL_POWER"
         self.render_frequency = 0.2
         self.difficulty_level = 0
-        # self.motive_profile_ratio = np.zeros((3), dtype=int32)
         self.significance_weight = 0.3
         self.adjacent_weight = 0.7
-        self.threshold_distance = 5 # localEffThresholdDistance
+        self.threshold_distance = 5
         self.local_aff_range = 3
         self.global_aff_range = 1
 

@@ -1,11 +1,8 @@
 import math
 import random
-from numba import njit, int32, jit
+from numba import njit
 import numpy as np
-from numba.typed import List
-
 from agent import Prey, Predator
-from customEnums import MotiveProfiles, TeamCompositions
 from modifiedIncentiveFunctions import calculateLocalIncentive, calculateLocalEfficiencyIncentive
 
 
@@ -41,16 +38,6 @@ def apply_integrate_f_numba(col_a, col_b, col_N):
         result[i] = integrate_f_numba(col_a[i], col_b[i], col_N[i])
     return result
 
-
-@njit
-def getPreyYield(sig, steps, totalSteps):
-    totalYield = 0
-    for i in range(len(sig)):
-        if sig[i] != "-1":
-            totalYield += int(sig[i])
-    teamYield = totalYield / totalSteps
-    return teamYield
-
 @njit
 def formatFolderName(ratio):
     name = ""
@@ -78,20 +65,20 @@ def configurePreys(numberOfPreys, difficulty):
         newPrey = Prey(id)
         # easy
         if difficulty == 0:
-            newPrey.sig = rand_choice_nb(np.array([2, 5, 10]), np.array([0.8, 0.1, 0.1]))
+            newPrey.sig = rand_choice_nb(np.array([2, 4, 6]), np.array([0.8, 0.1, 0.1]))
         # moderately difficult
         elif difficulty == 1:
-            newPrey.sig = rand_choice_nb(np.array([2, 5, 10]), np.array([1/3, 1/3, 1/3]))
+            newPrey.sig = rand_choice_nb(np.array([2, 4, 6]), np.array([1/3, 1/3, 1/3]))
         # difficult
         else:
-            newPrey.sig = rand_choice_nb(np.array([2, 5, 10]), np.array([0.1, 0.1, 0.8]))
+            newPrey.sig = rand_choice_nb(np.array([2, 4, 6]), np.array([0.1, 0.1, 0.8]))
 
         if newPrey.sig == 2:
             newPrey.stamina = 0.3
-        elif newPrey.sig == 5:
-            newPrey.stamina = 0.1
+        elif newPrey.sig == 4:
+            newPrey.stamina = 0.2
         else:
-            newPrey.stamina = 0.02
+            newPrey.stamina = 0.1
         preys.append(newPrey)
 
     return preys
@@ -164,7 +151,7 @@ def targetIsApproachable(currentPredator, grid, possibleTargetCells):
 def modified_calculateLocalIncentivesForEachGoal(prey,
                                                  predators, grid, significance_weight, adjacent_weight,predatorAffiliationRange):
     predatorCount = len(predators)
-    normalizedS = prey.sig / 10
+    normalizedS = prey.sig / 6
 
     a = 0
     for pred in predators:

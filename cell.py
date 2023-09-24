@@ -1,4 +1,3 @@
-
 from numba import int32, types
 from numba.experimental import jitclass
 

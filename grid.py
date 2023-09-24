@@ -1,16 +1,8 @@
+from numba import njit
 import numpy as np
-from numba import types, typeof, typed, njit
-from numba.typed import Dict
-from operator import itemgetter
-from numba.extending import typeof_impl, type_callable, models, register_model
-import numpy as np
-from numba import int32, float32, deferred_type
+from numba import int32
 from numba.experimental import jitclass
 import math
-from cell import Node
-
-
-from cell import Cell
 
 PREY = "PREY"
 PREDATOR = "PREDATOR"
@@ -42,8 +34,6 @@ spec = [
 
     ('numberOfRows', int32),               # a simple scalar field
     ('numberOfColumns', int32),
-    # ('grid', types.ListType(Cell.class_type.instance_type)),          # an array field
-    # ('grid', types.DictType(types.unicode_type, int32)),
     ('grid', int32[:, :, :]),
 ]
 
@@ -237,155 +227,9 @@ class Grid:
 
         return dx + dy
 
-
-    # https://www.raywenderlich.com/3016-introduction-to-a-pathfinding
-    def aStarPathFinding(self, startingCell, targetCell):
-            #(currentCell, parentCell, g, h, f)
-            opened = []
-            closed = []
-            gScore = 0
-            hScore = self.getManhattenDistance(startingCell, targetCell)
-            fScore = gScore + hScore
-
-            startingNode = (startingCell[0], startingCell[1], startingCell[0], startingCell[1], gScore, hScore, fScore)
-            opened.append(startingNode)
-            closed.append(startingNode)
-            i = 0
-            exited = False
-            while i < 100 and len(opened) > 0:
-                i += 1
-                # select the node in open with the lowest fScore as the current node
-                globalMin = math.inf
-                globalMinInd = 0
-                for idx in range(len(opened)):
-                    if opened[idx][6] <= globalMin:
-                        globalMinInd = idx
-                        globalMin = opened[idx][6]
-                currentNode = opened[globalMinInd]
-                # add current node to closed
-                if i == 1:
-                    closed.remove(startingNode)
-                closed.append(currentNode)
-                # remove current node from open
-                opened.remove(currentNode)
-
-                if currentNode[0] == targetCell[0] and currentNode[1] == targetCell[1]:
-                    exited = True
-                    break
-
-                neighboursOfCurrent = self.getNeighbours([currentNode[0], currentNode[1]])
-            #
-                for neighbourIdx in range(4):
-                    neighbour = neighboursOfCurrent[neighbourIdx]
-                    gScore = currentNode[4] + 1
-                    hScore = 1
-                    fScore = gScore + hScore
-
-                    neighbourNode = (neighbour[0], neighbour[1], currentNode[0], currentNode[1], gScore, hScore, fScore)
-            # #
-                    existsInClosed = False
-
-                    for abcIdx in range(len(closed)):
-                        # print("closed IDX", closed[abcIdx], neighbourNode)
-                        if closed[abcIdx][0] == neighbourNode[0] and closed[abcIdx][1] == neighbourNode[1] and closed[abcIdx][2] == neighbourNode[2] and\
-                                closed[abcIdx][3] == neighbourNode[3] and closed[abcIdx][4] == neighbourNode[4] and closed[abcIdx][5] == neighbourNode[5] and\
-                                closed[abcIdx][6] == neighbourNode[6]:
-                            existsInClosed = True
-                    if self.isCellOccupiedByPreyOrPredator(neighbour) or existsInClosed == True:
-
-                        continue
-
-            #
-            #
-                    # is new path to neighbour is shorter or neightbour is not in open
-            #
-                    existsInOpen = False
-                    for ijk in range(len(opened)):
-                        if opened[ijk][0] == neighbourNode[0] and opened[ijk][1] == neighbourNode[1] and opened[ijk][2] == neighbourNode[2] and \
-                                opened[ijk][3] == neighbourNode[3] and opened[ijk][4] == neighbourNode[4] and \
-                                opened[ijk][5] == neighbourNode[5] and \
-                                opened[ijk][6] == neighbourNode[6]:
-                            existsInOpen = True
-
-                    if existsInOpen == False or fScore < currentNode[4]:
-                        if existsInOpen == False:
-                            opened.append(neighbourNode)
-
-            # trace back the shortest path
-            node = closed[len(closed)-1]
-            bogusVal = (100, 100)
-            finalPath = [bogusVal]
-
-
-            if not exited:
-                return finalPath
-            else:
-                finalPath.remove(bogusVal)
-                while True:
-
-
-                    if node[0] == startingCell[0] and node[1] == startingCell[1]:
-                        break
-
-                    finalPath.append((node[0], node[1]))
-                    for parentIdx in range(len(closed)):
-                        if node[2] == closed[parentIdx][0] and node[3] == closed[parentIdx][1]:
-                            node = closed[parentIdx]
-                            break
-
-                return finalPath
-
-
-    #
-    # def seek(self, predator, distance):
-    #     detectedPreyCells = []
-    #     currentRow = predator.currentPosition.row
-    #     currentCol = predator.currentPosition.col
-    #     for j in range(distance+1):
-    #         for i in range(j+1):
-    #             leftLowerCell = self.getCell((currentRow - (j - i)) % self.numberOfRows, (currentCol - i) % self.numberOfColumns)
-    #             rightLowerCell = self.getCell((currentRow - (j - i)) % self.numberOfRows, (currentCol + i) % self.numberOfColumns)
-    #             leftUpperCell = self.getCell((currentRow + (j - i)) % self.numberOfRows, (currentCol - i) % self.numberOfColumns)
-    #             rightUpperCell = self.getCell((currentRow + (j - i)) % self.numberOfRows, (currentCol + i) % self.numberOfColumns)
-    #
-    #             # print("left lower row", leftLowerCell.getRow())
-    #             # print("left lower col", leftLowerCell.getCol())
-    #             #
-    #             # print("right lower row", rightLowerCell.getRow())
-    #             # print("right lower col", rightLowerCell.getCol())
-    #             #
-    #             # print("left upper row", leftUpperCell.getRow())
-    #             # print("left upper col", leftUpperCell.getCol())
-    #             #
-    #             # print("right upper row", rightUpperCell.getRow())
-    #             # print("right upper col", rightUpperCell.getCol())
-    #             if leftLowerCell.value[PREY] != 0:
-    #                 if leftLowerCell not in detectedPreyCells:
-    #                     detectedPreyCells.append(leftLowerCell)
-    #             elif rightLowerCell.value[PREY] != 0:
-    #                 if rightLowerCell not in detectedPreyCells:
-    #                     detectedPreyCells.append(rightLowerCell)
-    #             elif leftUpperCell.value[PREY] != 0:
-    #                 if leftUpperCell not in detectedPreyCells:
-    #                     detectedPreyCells.append(leftUpperCell)
-    #             elif rightUpperCell.value[PREY] != 0:
-    #                 if rightUpperCell not in detectedPreyCells:
-    #                     detectedPreyCells.append(rightUpperCell)
-    #     return detectedPreyCells
-    #
     def markDeadPrey(self, prey):
         currentCell = self.getCell(prey.currentPosition[0], prey.currentPosition[1])
         currentCell[2] = 0
         prey.status = "DEAD"
-    #
-    # def seekPreysInVisionRange(self, predator, preys, visionRange):
-    #     detectedPreys = []
-    #     for prey in preys:
-    #         distance = self.getManhattenDistance(predator.currentPosition, prey.currentPosition)
-    #         if distance <= visionRange:
-    #             detectedPreys.append(prey)
-    #
-    #     # returns an array of arrays
-    #     return detectedPreys
 
 
